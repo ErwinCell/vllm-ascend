@@ -26,6 +26,7 @@ from vllm_ascend.attention.attention_mask import AttentionMaskBuilder
 from vllm_ascend.attention.attention_v1 import AscendAttentionState
 from vllm_ascend.attention.context_parallel.common_cp import AscendPCPMetadata
 from vllm_ascend.attention.mla_v1 import MAX_O_PROJ_PREFETCH_SIZE, MLAPO_MAX_SUPPORTED_TOKENS
+from vllm_ascend.attention.sfa_kv_rows import write_indexer_cache
 from vllm_ascend.attention.sfa_slot_reuse import int64_slots_for_forward
 from vllm_ascend.attention.utils import (
     SFA_QSFA_TILE_SIZE,
@@ -1912,11 +1913,13 @@ class AscendSFAImpl(MLAAttentionImpl):
                     attn_metadata.block_size,
                 )
             else:
-                torch_npu.npu_scatter_nd_update_(
+                write_indexer_cache(
+                    self,
+                    attn_metadata,
                     kv_cache[dsa_k_cache_idx].view(-1, k_li.shape[-1]),
-                    slot_mapping.view(-1, 1),
+                    slot_mapping,
                     k_li.view(-1, k_li.shape[-1]),
-                )  # b, s, n, d
+                )
             if self.enable_sparse_li_c8:
                 assert len(kv_cache) == (3 if self.enable_sparse_sfa_c8 else 4)
                 if k_li_scale is not None:
