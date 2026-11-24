@@ -26,6 +26,7 @@ from vllm_ascend.attention.attention_mask import AttentionMaskBuilder
 from vllm_ascend.attention.attention_v1 import AscendAttentionState
 from vllm_ascend.attention.context_parallel.common_cp import AscendPCPMetadata
 from vllm_ascend.attention.mla_v1 import MAX_O_PROJ_PREFETCH_SIZE, MLAPO_MAX_SUPPORTED_TOKENS
+from vllm_ascend.attention.sfa_slot_reuse import int64_slots_for_forward
 from vllm_ascend.attention.utils import (
     SFA_QSFA_TILE_SIZE,
     AscendCommonAttentionMetadata,
@@ -1322,7 +1323,7 @@ class AscendSFAImpl(MLAAttentionImpl):
                 self.kv_a_layernorm.weight,  # type: ignore[union-attr]
                 cos,
                 sin,
-                slots.to(torch.int64),
+                int64_slots_for_forward(slots, attn_metadata),
                 kv_cache[1],
                 kv_cache[0],
                 epsilon=self.kv_a_layernorm.variance_epsilon,  # type: ignore[union-attr]

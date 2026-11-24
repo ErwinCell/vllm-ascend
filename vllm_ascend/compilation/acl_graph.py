@@ -137,6 +137,10 @@ class ACLGraphWrapper:
 
     def __call__(self, *args, **kwargs):
         forward_context = get_forward_context()
+        if self.runtime_mode == CUDAGraphMode.FULL:
+            # Warmup and every new capture must own their conversion node,
+            # even if a caller reuses the outer forward context.
+            forward_context._sfa_int64_slot_cache = None
         batch_descriptor = forward_context.batch_descriptor
         aclgraph_runtime_mode = forward_context.cudagraph_runtime_mode
 

@@ -88,6 +88,8 @@ def set_ascend_forward_context(
     }
     with set_forward_context(**forward_context_kwargs):
         forward_context = get_forward_context()
+        # The slot conversion is valid only for this model invocation.
+        forward_context._sfa_int64_slot_cache = None
         forward_context.draft_attn_metadatas = draft_attn_metadatas
 
         forward_context.input_ids = input_ids

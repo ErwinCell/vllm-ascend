@@ -103,6 +103,7 @@
   optional: false
   base: attention_common
   source_file_dependencies:
+    - vllm_ascend/attention/sfa_slot_reuse.py
     - vllm_ascend/attention/sfa_v1.py
   tests:
     - tests/ut/attention/a2/test_sfa_v1.py
